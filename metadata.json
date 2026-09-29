@@ -1,0 +1,6 @@
+{
+  "name": "Placement Interview Prep",
+  "description": "Prepare Smart. Practice Better. Get Placement Ready. Complete placement and technical/HR interview preparation platform for college students, freshers, and job seekers.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
