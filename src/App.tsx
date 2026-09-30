@@ -15,6 +15,7 @@ import { HRPage } from './pages/HRPage';
 import { CompanyPage } from './pages/CompanyPage';
 import { ProgressPage } from './pages/ProgressPage';
 import { ProfilePage } from './pages/ProfilePage';
+import { ChatbotWidget } from './components/ChatbotWidget';
 
 const AppContent: React.FC = () => {
   const { activeTab } = useAuth();
@@ -59,6 +60,7 @@ const AppContent: React.FC = () => {
         {renderCurrentPage()}
       </main>
       <Footer />
+      <ChatbotWidget />
     </div>
   );
 };

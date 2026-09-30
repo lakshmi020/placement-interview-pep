@@ -186,3 +186,10 @@ export interface NotificationItem {
   createdAt: string;
   link?: string;
 }
+
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'model';
+  content: string;
+  timestamp: string;
+}

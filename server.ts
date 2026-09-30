@@ -498,6 +498,126 @@ app.post('/api/coding/run', (req: Request, res: Response) => {
   }
 });
 
+// Gemini-Powered Placement Mentor Chatbot Endpoint
+app.post('/api/chat', async (req: Request, res: Response) => {
+  try {
+    const { messages, userRole, branch } = req.body;
+    if (!messages || !Array.isArray(messages) || messages.length === 0) {
+      return res.status(400).json({ error: 'Messages array is required.' });
+    }
+
+    if (aiClient) {
+      try {
+        const systemInstruction = `You are "PIP AI Placement Mentor", the expert campus placement & technical interview chatbot on the Placement Interview Prep (PIP) platform.
+Your objective is to help college students (B.Tech, Diploma, MCA, freshers) crack campus hiring drives, technical rounds, coding assessments, aptitude tests, and HR interviews.
+
+Student Profile Context:
+- Target Role: ${userRole || 'Software Development Engineer (SDE)'}
+- Branch: ${branch || 'Computer Science & Engineering'}
+
+Knowledge Base & Strengths:
+1. Technical interview questions (C, C++, Java, Python, JavaScript, OOP, DBMS & SQL, Operating Systems, Computer Networks, DSA, Algorithms, Web Development, Projects).
+2. Coding problems (Logic building, edge cases, time/space complexity O(n), dry runs).
+3. Aptitude tricks (Quantitative shortcuts, Logical reasoning patterns, Verbal grammar).
+4. HR & Behavioral questions with the STAR framework (Situation, Task, Action, Result).
+5. Top campus recruiters' patterns: TCS NQT, Infosys SP/DSE, Wipro Elite, Accenture ASE, Cognizant, Deloitte, Capgemini, Tech Mahindra, HCLTech.
+
+Guidelines:
+- Give crisp, highly readable answers with bullet points, bold key terms, and concise code snippets if asked.
+- Keep a supportive, professional mentor tone.
+- When explaining HR questions, provide sample phrases or STAR structure.
+- When explaining code/DSA, provide clear time and space complexity.`;
+
+        // Format history for Gemini API: [{ role: 'user' | 'model', parts: [{ text: ... }] }]
+        const contents = messages.map((m: any) => ({
+          role: m.role === 'model' || m.role === 'assistant' ? 'model' : 'user',
+          parts: [{ text: String(m.content || m.text || '') }],
+        }));
+
+        const response = await aiClient.models.generateContent({
+          model: 'gemini-3.8-flash',
+          contents,
+          config: {
+            systemInstruction,
+            temperature: 0.7,
+          },
+        });
+
+        const reply = response.text || "I'm here to help with your placement preparation. Could you please specify your question?";
+        return res.json({ reply, success: true });
+      } catch (geminiError: any) {
+        console.warn('Gemini chat API error, switching to heuristic response:', geminiError.message);
+      }
+    }
+
+    // Heuristic fallback if GEMINI_API_KEY is not configured or in case of transient issues
+    const lastUserMsg = (messages[messages.length - 1]?.content || '').toLowerCase();
+    let reply = "Hello! I am your PIP AI Placement Mentor. You can ask me any question regarding technical concepts (DSA, DBMS, OS, Networks, Java, Python), HR behavioral answers (STAR method), aptitude shortcuts, or company patterns like TCS NQT, Infosys, and Accenture.";
+
+    if (lastUserMsg.includes('tcs') || lastUserMsg.includes('nqt')) {
+      reply = `### 🎯 TCS NQT Preparation Blueprint
+1. **Cognitive Skills Assessment (165 mins):**
+   - **Numerical Ability:** Percentages, Profit & Loss, Work & Time, Speed & Distance, Probability.
+   - **Reasoning:** Syllogisms, Blood Relations, Number Series.
+   - **Verbal:** Sentence Completion, Para-jumbles, Grammar.
+2. **Coding Section:**
+   - 2 questions (1 basic array/string, 1 medium DSA like two pointers or hashing).
+3. **Technical Interview Round:**
+   - Core language internals (pointers in C, OOP in Java/C++).
+   - SQL Joins, Primary/Foreign keys, and Normalization (1NF-3NF).
+   - Thorough explanation of your final year college project.
+4. **HR Round:**
+   - Flexibility for rotational shifts, relocation readiness, and company values.`;
+    } else if (lastUserMsg.includes('infosys') || lastUserMsg.includes('dse')) {
+      reply = `### 🏢 Infosys SP & DSE Strategy
+- **Specialist Programmer (SP) / Digital Specialist Engineer (DSE):**
+  - Heavy emphasis on Competitive Programming (HackWithInfy / online assessment).
+  - Common topics: Dynamic Programming, Greedy Algorithms, Graph Traversals (BFS/DFS).
+- **System Engineer (Cognitive Test):**
+  - Signature Infosys topics: Cryptarithmetic puzzles, Critical Reasoning, Data Sufficiency.
+- **Technical Interview:**
+  - Data Structures (BST, Trees, LinkedLists), Java/Python OOP, and SDLC methodologies.`;
+    } else if (lastUserMsg.includes('star') || lastUserMsg.includes('hr') || lastUserMsg.includes('yourself')) {
+      reply = `### ⭐ The STAR Method for HR Questions
+Recruiters look for structured, metric-driven answers:
+- **S - Situation:** 1 sentence setting the background.
+- **T - Task:** The specific challenge or requirement you faced.
+- **A - Action:** The concrete technical choices and steps **you** took.
+- **R - Result:** Measurable outcome (*"reduced latency by 40%"*, *"completed ahead of deadline"*).
+
+**"Tell me about yourself" (60-90 seconds formula):**
+1. **Present:** Degree, branch, college, and core skills (e.g. Java, React, SQL).
+2. **Past:** Capstone project highlight or key internship achievement.
+3. **Future:** Why this specific company and role are the ideal launchpad for your career.`;
+    } else if (lastUserMsg.includes('dbms') || lastUserMsg.includes('sql') || lastUserMsg.includes('acid')) {
+      reply = `### 🗄️ Essential DBMS Interview Topics
+1. **ACID Properties:**
+   - **A**tomicity: All operations succeed or all roll back.
+   - **C**onsistency: Moves database from one valid state to another.
+   - **I**solation: Concurrent transactions do not interfere.
+   - **D**urability: Committed changes survive system crashes.
+2. **Indexing (B+ Trees):**
+   - High fan-out reduces disk I/O; leaf nodes are linked for sequential range scans.
+3. **Normalization:**
+   - 1NF (atomic values), 2NF (no partial dependency), 3NF (no transitive dependency), BCNF.
+4. **SQL Joins & Window Functions:**
+   - INNER, LEFT, RIGHT, FULL OUTER. Use \`DENSE_RANK()\` for Nth highest salary.`;
+    } else if (lastUserMsg.includes('dsa') || lastUserMsg.includes('algorithm') || lastUserMsg.includes('tree') || lastUserMsg.includes('array')) {
+      reply = `### 💻 Top DSA Patterns for Campus Placements
+1. **Two Pointers & Sliding Window:** Best for subarray and string problems (e.g., Two Sum, Longest Substring).
+2. **Fast & Slow Pointers:** Linked List cycle detection (Floyd's algorithm) and finding midpoints.
+3. **Stack:** Monotonic stack for Next Greater Element and Valid Parentheses.
+4. **Trees & BST:** Inorder traversal of BST gives sorted sequence. Level Order (BFS) using queue.
+5. **Dynamic Programming:** Kadane's algorithm (Max Subarray), 0/1 Knapsack, Coin Change.`;
+    }
+
+    return res.json({ reply, success: true });
+  } catch (err: any) {
+    console.error('Chat endpoint error:', err);
+    return res.status(500).json({ error: 'Chat failed: ' + err.message });
+  }
+});
+
 // Vite Integration: Dev vs Prod
 async function startServer() {
   if (process.env.NODE_ENV !== 'production') {

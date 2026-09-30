@@ -18,7 +18,8 @@ import {
   Trophy, 
   GraduationCap,
   ShieldCheck,
-  Zap
+  Zap,
+  Bot
 } from 'lucide-react';
 import { COMPANY_PREPARATION_DATA } from '../data/mockData';
 
@@ -26,6 +27,15 @@ export const LandingPage: React.FC = () => {
   const { setActiveTab, isAuthenticated } = useAuth();
 
   const features = [
+    {
+      icon: Bot,
+      color: 'from-purple-600 to-indigo-700',
+      title: '24/7 AI Placement Mentor',
+      desc: 'Ask placement questions, verify algorithm logic, review HR answers, and get company blueprints powered by Google Gemini.',
+      badge: 'Gemini AI',
+      isChatbotTrigger: true,
+      tab: 'chat'
+    },
     {
       icon: Target,
       color: 'from-blue-500 to-indigo-600',
@@ -130,6 +140,15 @@ export const LandingPage: React.FC = () => {
               <span>{isAuthenticated ? 'Open Student Dashboard' : 'Start Preparing Free'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
+            <button
+              onClick={() => {
+                window.dispatchEvent(new CustomEvent('open-pip-chatbot'));
+              }}
+              className="w-full sm:w-auto px-7 py-3.5 rounded-xl border border-purple-300 dark:border-purple-800 bg-purple-50/80 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 font-bold text-sm hover:bg-purple-100 dark:hover:bg-purple-900/60 shadow-sm transition-all flex items-center justify-center gap-2"
+            >
+              <Sparkles className="w-4 h-4 text-purple-600 dark:text-purple-400 animate-pulse" />
+              <span>Ask AI Placement Mentor</span>
+            </button>
             <a
               href="#features"
               className="w-full sm:w-auto px-7 py-3.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold text-sm hover:bg-slate-50 dark:hover:bg-slate-700/80 transition-all flex items-center justify-center gap-2"
@@ -201,7 +220,13 @@ export const LandingPage: React.FC = () => {
             return (
               <div
                 key={idx}
-                onClick={() => setActiveTab(feature.tab)}
+                onClick={() => {
+                  if ((feature as any).isChatbotTrigger) {
+                    window.dispatchEvent(new CustomEvent('open-pip-chatbot'));
+                  } else {
+                    setActiveTab(feature.tab);
+                  }
+                }}
                 className="group relative p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 shadow-xs hover:shadow-xl hover:border-indigo-300 dark:hover:border-indigo-700/60 hover:-translate-y-1 transition-all duration-200 cursor-pointer flex flex-col justify-between"
               >
                 <div>

@@ -301,5 +301,34 @@ export const ApiService = {
     } else {
       document.documentElement.classList.remove('dark');
     }
+  },
+
+  // Gemini AI Chatbot
+  async sendChatMessage(
+    messages: { role: 'user' | 'model'; content: string }[],
+    userRole?: string,
+    branch?: string
+  ): Promise<string> {
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages, userRole, branch }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.reply) {
+          return data.reply;
+        }
+      }
+    } catch {
+      // Fallback
+    }
+
+    const lastMsg = (messages[messages.length - 1]?.content || '').toLowerCase();
+    if (lastMsg.includes('tcs') || lastMsg.includes('nqt')) {
+      return `### TCS NQT Strategy 🎯\n- **Cognitive Round:** Focus on Percentages, Profit & Loss, Work & Time, Series, and Syllogisms.\n- **Coding Round:** 2 questions (Strings/Arrays + Two Pointers or Hashing).\n- **Technical Interview:** Language fundamentals, SQL joins, Normalization, and your capstone project.\n- **HR Round:** Flexibility with shifts and relocation.`;
+    }
+    return "I am your PIP AI Placement Mentor! Ask me any question regarding technical topics (DSA, DBMS, OS, Java, Python), HR behavioral answers (STAR method), aptitude shortcuts, or company patterns like TCS NQT, Infosys, and Accenture.";
   }
 };

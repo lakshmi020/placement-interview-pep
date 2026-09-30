@@ -111,6 +111,18 @@ export const Navbar: React.FC = () => {
 
             {/* Right Action Icons & Auth */}
             <div className="flex items-center gap-2">
+              {/* AI Mentor Chatbot Trigger */}
+              <button
+                onClick={() => {
+                  window.dispatchEvent(new CustomEvent('open-pip-chatbot'));
+                }}
+                className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-purple-200 dark:border-purple-900/60 bg-purple-50/80 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/60 text-xs font-bold transition-all shadow-2xs"
+                title="Chat with PIP AI Placement Mentor"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400 animate-pulse" />
+                <span>AI Mentor</span>
+              </button>
+
               {/* Global Search Button */}
               <button
                 onClick={() => setSearchModalOpen(true)}
@@ -307,6 +319,22 @@ export const Navbar: React.FC = () => {
         {/* Mobile Navigation Drawer */}
         {mobileMenuOpen && (
           <div className="xl:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 pt-3 pb-6 space-y-1 shadow-xl">
+            <button
+              onClick={() => {
+                window.dispatchEvent(new CustomEvent('open-pip-chatbot'));
+                setMobileMenuOpen(false);
+              }}
+              className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm font-bold bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 mb-2 border border-purple-200 dark:border-purple-800"
+            >
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                <span>Chat with PIP AI Mentor</span>
+              </div>
+              <span className="px-1.5 py-0.5 text-[9px] font-black uppercase rounded bg-purple-600 text-white">
+                Gemini
+              </span>
+            </button>
+
             {navLinks.map((item) => (
               <button
                 key={item.id}
